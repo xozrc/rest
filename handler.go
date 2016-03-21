@@ -32,26 +32,22 @@ func restReturn(code int, result interface{}, err error, rw http.ResponseWriter,
 	rw.WriteHeader(code)
 	rw.Header().Set("Content-Type", "application/json")
 	if code == http.StatusOK && result != nil {
-		rb, err := json.Marshal(result)
+
+		err := json.NewEncoder(w).Encode(result)
+
 		if err != nil {
 			panic(err.Error())
 		}
-		_, err = rw.Write(rb)
-		if err != nil {
-			panic(err.Error())
-		}
+
 		return
 	}
 
 	if err != nil {
-		rb, err := json.Marshal(err)
+		err = json.NewEncoder(w).Encode(err)
 		if err != nil {
 			panic(err.Error())
 		}
-		_, err = rw.Write(rb)
-		if err != nil {
-			panic(err.Error())
-		}
+
 		return
 	}
 	panic("rest return error")
