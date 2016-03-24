@@ -24,11 +24,6 @@ func (chf ContextHandlerFunc) ServeHTTPContext(ctx context.Context, rw http.Resp
 	chf(ctx, rw, req)
 }
 
-//void context handler
-func voidContextHandler() ContextHandler {
-	return ContextHandlerFunc(func(ctx context.Context, rw http.ResponseWriter, req *http.Request) {})
-}
-
 //middleware context handler
 type MiddlewareContextHandler interface {
 	ServeHTTPContext(ctx context.Context, rw http.ResponseWriter, req *http.Request, next ContextHandler)
@@ -47,12 +42,12 @@ func chainHandlers(ch MiddlewareContextHandler, nh ContextHandler) ContextHandle
 }
 
 //http handler
-func HTTPHandlers(ctx context.Context, handlers ...MiddlewareContextHandler) http.Handler {
+func HTTPHandlers(ctx context.Context, tailHandler ContextHandler, handlers ...MiddlewareContextHandler) http.Handler {
 	lenOfHandlers := len(handlers)
 
 	f := func(rw http.ResponseWriter, req *http.Request) {
 
-		nh := voidContextHandler()
+		nh := tailHandler
 		for i := lenOfHandlers - 1; i >= 0; i-- {
 			ch := handlers[i]
 			nh = chainHandlers(ch, nh)
